@@ -49,8 +49,42 @@ helpers do
     "<img src='/images/cards/#{suit}_#{value}.jpg' class='card_image'>"
   end
 
+  def blackjack_check
+
+    @dealer_total = calculate_hand_total(session[:dealer_cards])
+    @player_total = calculate_hand_total(session[:player_cards])
+
+    if @player_total == 21 && @dealer_total == 21
+      @success = "Both players get Blackjack. Keep your money."
+      @show_hit_or_stay_buttons = false
+    elsif @player_total == 21
+      @success = "Blackjack! #{session[:player_name]} wins!"
+      @show_hit_or_stay_buttons = false
+    elsif @dealer_total == 21
+      @error =  "Dealer got Blackjack. Dealer wins."
+      @show_hit_or_stay_buttons = false
+    end
+  end
+
+  def compare_total
+
+    blackjack_check
+
+    if @player_total > 21
+      @error = "#{session[:player_name]} busted." 
+    elsif @dealer_total > 21
+      @success = "Dealer busted! #{session[:player_name]} wins!"
+    elsif @player_total > @dealer_total
+      @success = "#{session[:player_name]} wins with #{@player_total} over #{@dealer_total}!"
+    else
+      @error = "#{session[:player_name]} loses with #{@player_total} compared to Dealer's #{@dealer_total}."
+    end
+  end
+
   before do
     @show_hit_or_stay_buttons = true
+    @show_dealer_hit_button = false
+    @show_dealer_hand = true
   end
 end
 
@@ -72,7 +106,7 @@ post '/new_player' do
     @error = "Your name is required."
     halt erb(:new_player)
   end
-  
+
   session[:player_name] = params[:player_name]
   redirect '/game'
 end
@@ -90,28 +124,54 @@ get '/game' do
     session[:player_cards] << session[:deck].shift
   end
 
+  @show_dealer_hand = false
+
+  blackjack_check
+
   erb :game
 end
 
 post '/game/player/hit' do
   session[:player_cards] << session[:deck].shift
-  
-  player_total = calculate_hand_total(session[:player_cards])
-  if player_total == 21
-    @success = "#{session[:player_name]} hit blackjack!"
+  @show_dealer_hand = false
+
+  if calculate_hand_total(session[:player_cards]) == 21
     @show_hit_or_stay_buttons = false
-  elsif player_total > 21
-    @error = "#{session[:player_name]} busted!"
+    @show_dealer_hit_button = true
+  elsif calculate_hand_total(session[:player_cards]) > 21
     @show_hit_or_stay_buttons = false
+    compare_total
   end
 
   erb :game
 end
 
-
 post '/game/player/stay' do
-  @success = "#{session[:player_name]} has chosen to stay."
   @show_hit_or_stay_buttons = false
+ 
+  if calculate_hand_total(session[:dealer_cards]) < 17
+    @show_dealer_hit_button = true
+  elsif (17..20).include?(calculate_hand_total(session[:dealer_cards]))
+    @show_hit_or_stay_buttons = false
+    compare_total
+  end
+
+  erb :game
+end
+
+post '/game/dealer/hit' do
+  session[:dealer_cards] << session[:deck].shift
+  
+  if calculate_hand_total(session[:dealer_cards]) < 17
+    @show_hit_or_stay_buttons = false
+    @show_dealer_hit_button = true
+  elsif (17..21).include?(calculate_hand_total(session[:dealer_cards]))
+    @show_hit_or_stay_buttons = false
+    compare_total
+  else
+    @show_hit_or_stay_buttons = false
+    compare_total
+  end
 
   erb :game
 end
