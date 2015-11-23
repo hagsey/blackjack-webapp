@@ -31,6 +31,22 @@ helpers do
     total
   end
 
+  def generate_deck
+    suits = ['D', 'H', 'S', 'C']
+    cards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+    session[:deck] = cards.product(suits).shuffle!
+  end
+
+  def deal_opening_cards
+    session[:dealer_cards] = []
+    session[:player_cards] = []
+
+    2.times do
+      session[:dealer_cards] << session[:deck].shift
+      session[:player_cards] << session[:deck].shift
+    end
+  end
+
   def card_image(card)
     suit = case card[1]
       when 'H' then 'hearts'
@@ -147,20 +163,10 @@ post '/make_bet' do
 end
 
 get '/game' do
-  suits = ['D', 'H', 'S', 'C']
-  cards = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
-  session[:deck] = cards.product(suits).shuffle!
-
-  session[:dealer_cards] = []
-  session[:player_cards] = []
-
-  2.times do
-    session[:dealer_cards] << session[:deck].shift
-    session[:player_cards] << session[:deck].shift
-  end
-  
   @show_dealer_hand = false
 
+  generate_deck
+  deal_opening_cards
   blackjack_check
 
   erb :game
