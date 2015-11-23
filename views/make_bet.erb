@@ -1,0 +1,8 @@
+<h2> Make a bet </h2>
+
+<form action='/make_bet' method="post">
+  <p>Maximum of $<%= session[:player_pot].to_i %>.</p>
+  <input type='text' name="player_bet" />
+  </br>
+  <input type="submit" class="btn"/>
+</form>

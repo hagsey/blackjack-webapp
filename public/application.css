@@ -10,3 +10,8 @@ form#stay_form {
 img.card_image {
   margin: 5px;
 }
+
+span.label {
+  padding: 3px 5px 5px 5px;
+  margin-bottom: 10px;
+}

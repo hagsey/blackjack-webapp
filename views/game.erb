@@ -1,6 +1,21 @@
-<h1>Blackjack</h1>
 
-<h5>Welcome <%= session[:player_name] %>.</h5>
+
+<% if session[:player_pot] == 0 %>
+  <% @error = "You're out of money!" %>
+  <h2>New game?</h2>
+  <a href="/new_player" class="btn btn-primary">Yes</a>
+  <a href="/game_over" class="btn">No</a>
+<% elsif @play_again %>
+  <h2>Deal again?</h2>
+  <a href="/make_bet" class="btn btn-primary">Yes</a>
+  <a href="/game_over" class="btn">No</a>
+<% else %>
+  <h2>Let's play blackjack!</h2>
+<% end %>
+
+<span class="label label-info">
+<h4>Pot size: $<%= session[:player_pot] %></h4>
+</span>
 
 <div class="well">
   <% if @show_dealer_hand %>
@@ -9,7 +24,7 @@
         <%= card_image(card)%>
       <% end %>
     <br/>
-    <p>Dealer's total: <%= calculate_hand_total(session[:dealer_cards]) %></p>
+    <h5>Dealer's total: <%= calculate_hand_total(session[:dealer_cards]) %></h5>
     <% if @show_dealer_hit_button %>
       <form id="hit_form" action="/game/dealer/hit" method='post'>
         <input type="submit" class="btn btn-primary" value="See dealer's next card..." />
@@ -18,7 +33,7 @@
     <br/>
   <% else %>
     <h4>Dealer's cards:</h4>
-      <%= card_image(session[:dealer_cards].first)%>
+      <%= card_image(session[:dealer_cards][0])%>
       <img src='/images/cards/cover.jpg' >
   <% end %>
 </div>
@@ -31,7 +46,7 @@
     <%= card_image(card)%>
     <% end %>
   <br/>
-  <p><%= session[:player_name]%>'s total: <%= calculate_hand_total(session[:player_cards]) %></p>
+  <h5><%= session[:player_name]%>'s total: <%= calculate_hand_total(session[:player_cards]) %></h5>
   <br/>
 
   <% if @show_hit_or_stay_buttons %>
