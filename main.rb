@@ -185,7 +185,7 @@ post '/game/player/hit' do
     compare_total
   end
 
-  erb :game
+  erb :game, layout: false
 end
 
 get '/game_over' do
@@ -201,7 +201,7 @@ post '/game/player/stay' do
     compare_total
   end
 
-  erb :game
+  erb :game, layout: false
 end
 
 post '/game/dealer/hit' do
@@ -209,9 +209,10 @@ post '/game/dealer/hit' do
   
   if calculate_hand_total(session[:dealer_cards]) < MIN_DEALER_HIT
     @show_dealer_hit_button = true
+    @show_hit_or_stay_buttons = false
   else
     compare_total
   end
 
-  erb :game
+  erb :game, layout: false
 end
